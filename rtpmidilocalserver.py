@@ -1,31 +1,40 @@
 from socket import socket, gethostbyname, AF_INET, SOCK_DGRAM
 import sys
-PORT_NUMBER = 5000
-SIZE = 1024
 
-hostName = gethostbyname( '0.0.0.0' )
+class socketServer():
+	
+	
+	PORT_NUMBER = 5000
+	SIZE = 1024
+	
+	client=""
+	client_port=""
+	
+	def __init__(self):
+		hostName = gethostbyname( '0.0.0.0' )
+		print(hostName)
+		self.mySocket = socket( AF_INET, SOCK_DGRAM )
+		self.mySocket.bind( (hostName, self.PORT_NUMBER) )
 
-mySocket = socket( AF_INET, SOCK_DGRAM )
-mySocket.bind( (hostName, PORT_NUMBER) )
+		print ("socket server listening on port {0}\n".format(self.PORT_NUMBER))
 
-print ("Test server listening on port {0}\n".format(PORT_NUMBER))
-
-client=""
-client_port=""
-
-while True:
-        (data,addr) = mySocket.recvfrom(SIZE)
-        data=data.decode()
-        if data=="findip":
-            #if client=="":
-            print("CLIENT FOUND!")
-            mySocket.sendto(b'SERVER HERE!',addr)
-            client=addr[0]
-            client_port=addr[1]
-        print (data,addr)
-sys.ext()
+	def listenForClient(self):
 
 
+		while True:
+				(data,addr) = self.mySocket.recvfrom(self.SIZE)
+				data=data.decode()
+				if data=="findip":
+					#if client=="":
+					print("CLIENT FOUND!")
+					self.mySocket.sendto(b'SERVER_HERE',addr)
+					self.client=addr[0]
+					self.client_port=addr[1]
+				print (data,addr)
+		sys.ext()
+
+SS=socketServer()
+SS.listenForClient()
 
 """
 from builtins import bytes

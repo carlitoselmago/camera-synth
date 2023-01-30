@@ -1,22 +1,4 @@
-"""
-import sys
-from socket import socket, AF_INET, SOCK_DGRAM,gethostbyname,gethostname
-import time
 
-
-
-SERVER_IP   = '192.168.1.133'
-PORT_NUMBER = 5000
-SIZE = 1024
-print ("Test client sending packets to IP {0}, via port {1}\n".format(SERVER_IP, PORT_NUMBER))
-
-mySocket = socket( AF_INET, SOCK_DGRAM )
-
-while True:
-        mySocket.sendto('cool',(SERVER_IP,PORT_NUMBER))
-        time.sleep(1)
-sys.exit()
-"""
 import socket
 from threading import Thread
 import time
@@ -52,25 +34,28 @@ def is_server_up(ip, port):
         return False
     finally:
         s.close()
-    
-def captureServerIP(s,ip):
-	s=socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-	
-	try:
-		res=s.connect((ip,port))
-		s.close()
-		print(res)
-		"""
-		(data,addr) = s.recvfrom(SIZE)
-		print((data,addr))
-		serverIP=addr[0]
-		print(ip)
-		print("serverIP set!!!!",serverIP)
-		#print(data,addr)
-		"""
-	except socket.error:
-		pass
 
+def midiMessenger(ip,port):
+	with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+		s.connect((ip, port))
+		s.sendto(b'start', (ip, port))
+		while True:
+			data = s.recv(1024)
+			print(f"Received {data!r}")
+			s.sendto(b'ok', (ip, port))
+	"""
+	s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+	hostName = socket.gethostbyname( '0.0.0.0' )
+	s.sendto(b'findip', (ip, port))
+	#s.bind( (hostName,port) )
+	s.settimeout(2)
+	#s.connect((ip,port))
+	#s.sendto(b'start', (ip, port))
+	while True:
+
+		data, addr = s.recvfrom(1024)
+		print(data)
+	"""
 
 def get_server_ip(local_ip="0.0.0.0"):
 	#octets = local_ip.split('.')[0]
@@ -85,21 +70,12 @@ def get_server_ip(local_ip="0.0.0.0"):
 		if server_check:
 			serverIP=server_check[0]
 			print("FOUND ip",serverIP)
+
+			#init messenger
+			time.sleep(0.5)
+			midiMessenger(serverIP,port)
 			break
-		#print(target)
-		"""
-		t = Thread(target=captureServerIP, args=[s,target])
-		t.start()
-		try:
-			#con=s.sendto(b'findip',(target,port))
-			#con=s.connect((target, port))
-			con=s.sendto(b'findip',(target,port))
-			
-			#print(target,con)
-		except:
-			pass
-		time.sleep(0.0001)
-		"""
+
 
 
 if __name__ == '__main__':

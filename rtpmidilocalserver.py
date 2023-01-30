@@ -1,3 +1,33 @@
+from socket import socket, gethostbyname, AF_INET, SOCK_DGRAM
+import sys
+PORT_NUMBER = 5000
+SIZE = 1024
+
+hostName = gethostbyname( '0.0.0.0' )
+
+mySocket = socket( AF_INET, SOCK_DGRAM )
+mySocket.bind( (hostName, PORT_NUMBER) )
+
+print ("Test server listening on port {0}\n".format(PORT_NUMBER))
+
+client=""
+client_port=""
+
+while True:
+        (data,addr) = mySocket.recvfrom(SIZE)
+        data=data.decode()
+        if data=="findip":
+            #if client=="":
+            print("CLIENT FOUND!")
+            mySocket.sendto(b'SERVER HERE!',addr)
+            client=addr[0]
+            client_port=addr[1]
+        print (data,addr)
+sys.ext()
+
+
+
+"""
 from builtins import bytes
 
 from optparse import OptionParser
@@ -62,11 +92,7 @@ def main():
         logging.basicConfig(level=log_level)
 
     class ExampleHandler(pymidi.server.Handler):
-        """Example handler.
-
-        This handler doesn't do all that much; we're just using one here to
-        illustrate the handler interface, so you can write a much cooler one.
-        """
+        
 
         def __init__(self):
             self.logger = logging.getLogger('ExampleHandler')
@@ -102,3 +128,4 @@ def main():
 
 
 main()
+"""

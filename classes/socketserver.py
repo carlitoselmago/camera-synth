@@ -1,5 +1,6 @@
-from socket import socket, gethostbyname, AF_INET, SOCK_DGRAM
+from socket import socket, gethostbyname, AF_INET, SOCK_DGRAM,SOCK_STREAM
 import sys
+import time
 
 class socketServer():
 	
@@ -28,14 +29,42 @@ class socketServer():
 					#if client=="":
 					print("CLIENT FOUND!")
 					self.mySocket.sendto(b'SERVER_HERE',addr)
+					#self.mySocket.accept()
 					self.client=addr[0]
 					self.client_port=addr[1]
+					break
 				print (data,addr)
-		sys.ext()
+				#if data=="start":
+				"""
+				if len(self.client)>0:
+					print("vamooo",self.client)
+					self.mySocket.sendto(b'vamooooo!',(self.client,self.client_port))
+					#self.mySocket.sendall(b'vamooooo!')
+					#time.sleep(1)
+				"""
+	def sendMessage(self,name="",value=0):
+		if "conn" in dir(self):
+			self.conn.sendall(str.encode(name))
+	
+	def startStream(self):
+	    print("startStream")
+	    with socket(AF_INET, SOCK_STREAM) as s:
+		    s.bind(( '0.0.0.0', self.PORT_NUMBER))
+		    s.listen()
+		    self.conn, addr = s.accept()
+		    with self.conn:
+			    print(f"Connected by {addr}")
+			    while True:
+				    data = self.conn.recv(1024)
+				    if not data:
+					    pass
+					    break
+				    #self.conn.sendall(b'holaaa')
+					
 
-SS=socketServer()
-SS.listenForClient()
-
+#SS=socketServer()
+#SS.listenForClient()
+#SS.startStream()
 """
 from builtins import bytes
 

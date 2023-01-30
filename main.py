@@ -20,7 +20,7 @@ camera.rotation = 180
 rawCapture = PiRGBArray(camera, size=(640, 480))
 # allow the camera to warmup
 time.sleep(0.1)
-hog = cv2.HOGDescriptor()
+hog = cv2.HOGDescriptor()	
 hog.setSVMDetector(cv2.HOGDescriptor_getDefaultPeopleDetector())
 
 oscSender = udp_client.SimpleUDPClient("192.168.1.133", 8000)

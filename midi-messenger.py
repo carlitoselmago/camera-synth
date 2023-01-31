@@ -2,11 +2,31 @@
 import socket
 from threading import Thread
 import time
+import logging
 
 port=5000
 SIZE=1024
 
 serverIP=""
+
+import rtmidi
+
+midiout = rtmidi.MidiOut()
+available_ports = midiout.get_ports()
+
+# here we're printing the ports to check that we see the one that loopMidi created. 
+# In the list we should see a port called "loopMIDI port".
+print(available_ports)
+
+# Attempt to open the port
+if available_ports:
+	for i,p in enumerate(available_ports):
+		if "loopMIDI" in p:
+			midiout.open_port(i)
+else:
+    midiout.open_virtual_port("My virtual output")
+
+logger = logging.getLogger('pymidi.examples.server')
 
 def get_local_ip():
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -41,7 +61,14 @@ def midiMessenger(ip,port):
 		s.sendto(b'start', (ip, port))
 		while True:
 			data = s.recv(1024)
-			print(f"Received {data!r}")
+			data=data.decode()
+			if data=="morepeople":
+				note_on=[0x90, 60,127]
+				midiout.send_message(note_on)
+			if data=="lesspeople":
+				note_on=[0x90, 40,127]
+				midiout.send_message(note_on)
+			#print(f"Received {data!r}")
 			s.sendto(b'ok', (ip, port))
 	"""
 	s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)

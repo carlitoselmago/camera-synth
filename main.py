@@ -1,4 +1,4 @@
 from classes.camera import Camera
+import sys
 
-
-CAM=Camera()
+CAM=Camera(sys.argv)

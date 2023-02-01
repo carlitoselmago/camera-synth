@@ -20,7 +20,7 @@ class midiMessenger():
 	speed=0.01 #speed of while loop translation
 
 	people=0
-	maxpeople=8
+	maxpeople=20
 
 	minCC=5
 

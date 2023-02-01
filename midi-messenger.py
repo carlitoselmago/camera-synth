@@ -143,6 +143,7 @@ class midiMessenger():
 		"""
 
 	def get_server_ip(self,local_ip="0.0.0.0"):
+		print("get server ip")
 		#octets = local_ip.split('.')[0]
 		ipp=local_ip.split(".")
 		ipbase=ipp[0]+"."+ipp[1]+"."+ipp[2]+"."

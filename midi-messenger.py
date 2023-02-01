@@ -43,38 +43,41 @@ class midiMessenger():
 				if "loopMIDI" in p:
 					self.midiout.open_port(i)
 		else:
-		    self.midiout.open_virtual_port("My virtual output")
+			self.midiout.open_virtual_port("My virtual output")
 
 		logger = logging.getLogger('pymidi.examples.server')
 
 
 	def get_local_ip(self):
-	    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-	    try:
-	        s.connect(('10.255.255.255', 1))
-	        IP = s.getsockname()[0]
-	    except:
-	        IP = '127.0.0.1'
-	    finally:
-	        s.close()
-	    return IP
+		s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+		try:
+			s.connect(('10.255.255.255', 1))
+			IP = s.getsockname()[0]
+		except:
+			IP = '127.0.0.1'
+		finally:
+			s.close()
+		return IP
 
 	def is_server_up(self,ip, port):
-	    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-	    s.settimeout(0.001)
-	    s.sendto(b'findip', (ip, port))
-	    try:
-	        
-	        data, addr = s.recvfrom(1024)
-	        #print(data,addr)
-	        if data == b'SERVER_HERE':
-	            return addr
-	        else:
-	            return False
-	    except socket.error:
-	        return False
-	    finally:
-	        s.close()
+		s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+		#s.settimeout(0.05)
+		s.sendto(b'findip', (ip, port))
+		
+		try:
+			
+			data, addr = s.recvfrom(1024)
+			#print(data,addr)
+			if data == b'SERVER_HERE':
+				print("found signal from server")
+				return addr
+			else:
+				return False
+		except socket.error:
+			return False
+		finally:
+			s.close()
+		print("is_server_up end")
 
 
 	def translateData2Midi(self,data):
@@ -107,15 +110,18 @@ class midiMessenger():
 			time.sleep(self.speed)
 
 	def midiMessenger(self,ip,port):
+		print("connection stablished with ",ip)
 		with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
 			s.connect((ip, port))
+			#s.timeout(0.1)
 			s.sendto(b'start', (ip, port))
+			print("DATA WILL BE RECIEVED")
 			while True:
 				data = s.recv(1024)
 				data=data.decode()
 				datalist=json.loads(data)
-				print("datalist")
-				print(datalist)
+				#print("datalist")
+				#print(datalist)
 				if len(datalist)>0:
 					self.translateData2Midi(datalist)
 				#self.handleFluidMidi()
@@ -132,21 +138,34 @@ class midiMessenger():
 		print("connection end?")
 
 	def get_server_ip(self,local_ip="0.0.0.0"):
+		server_check=self.is_server_up("192.168.1.28", self.port)
+		print(server_check)
+		t = Thread(target=self.handleFluidMidi)
+		t.start()
+
+		self.midiMessenger("192.168.1.28",self.port)
+		"""
 		print("get server ip")
 		#octets = local_ip.split('.')[0]
 		ipp=local_ip.split(".")
 		ipbase=ipp[0]+"."+ipp[1]+"."+ipp[2]+"."
 		
 		s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+		#s.timeout(0.01)
 
 		for i in range(1,300):
 			target=ipbase+str(i)
 			
 			try:
+
 				server_check=self.is_server_up(target, self.port)
+				#print("target",target)
 			except:
-				print("failed on",target)
+				#print("failed on",target)
 				server_check=False
+			finally:
+				pass
+				#print("finally")
 			if server_check:
 				serverIP=server_check[0]
 				print("FOUND ip",serverIP)
@@ -159,15 +178,17 @@ class midiMessenger():
 
 				self.midiMessenger(serverIP,self.port)
 				break
+			
 
 		print("")
 		print("no connection found")
-
+		"""
 
 
 if __name__ == '__main__':
 	MM=midiMessenger()
 	local_ip = MM.get_local_ip()
+	#MM.midiMessenger("192.168.1.28",MM.port)
 	server_ip=MM.get_server_ip(local_ip)
 	print("")
 	print("Local IP: ",local_ip)

@@ -111,7 +111,7 @@ class midiMessenger():
 
 	def midiMessenger(self,ip,port):
 		print("connection stablished with ",ip)
-		with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+		with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s: 
 			s.connect((ip, port))
 			#s.timeout(0.1)
 			s.sendto(b'start', (ip, port))

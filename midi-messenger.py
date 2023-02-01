@@ -5,7 +5,7 @@ import time
 import logging
 import json
 import rtmidi
-
+from classes.midiwrapper import MidiOutWrapper
 
 class midiMessenger():
 
@@ -25,12 +25,19 @@ class midiMessenger():
 	minCC=5
 
 	midiM=[
-	{"name":"people","type":0xb0,"extra":0x74,"value":0,"nextvalue":0} #CC=0xb0
+	#{"name":"people","type":0xb0,"extra":0x74,"value":0,"nextvalue":0}, #CC=0xb0
+	{"name":"people","type":"PROGRAM_CHANGE","extra":30,"value":0,"nextvalue":0,"channel":1}, #CC=0xb0
+
+	{"name":"topL","type":"PROGRAM_CHANGE","extra":31,"value":0,"nextvalue":0,"channel":2} ,
+	{"name":"topR","type":"PROGRAM_CHANGE","extra":32,"value":0,"nextvalue":0,"channel":2} ,
+	{"name":"BottomL","type":"PROGRAM_CHANGE","extra":33,"value":0,"nextvalue":0,"channel":3} ,
+	{"name":"BottomR","type":"PROGRAM_CHANGE","extra":34,"value":0,"nextvalue":0,"channel":3} 
 		]
 
 
 	def __init__(self):
 		self.midiout = rtmidi.MidiOut()
+		self.midiout = MidiOuWrapper(self.midiout)
 		available_ports = self.midiout.get_ports()
 
 		# here we're printing the ports to check that we see the one that loopMidi created. 
@@ -79,17 +86,52 @@ class midiMessenger():
 			s.close()
 		print("is_server_up end")
 
+	def scaleMidi(self,value,maxvalue):
+		return (float(value)/maxvalue)*(127)
 
 	def translateData2Midi(self,data):
 
-		self.people=len(data)
+		centers=data["centers"]
+		width=data["width"]
+		height=data["height"]
+
+		self.people=len(centers)
 
 		peopleV=(float(self.people)/self.maxpeople)*(127)
+
+		topL=0 
+		topR=0 
+		BottomL=0
+		BottomR=0
+
+		#convert centers to percentages
+		centersPercent=[]
+		for c in centers:
+			xPercent=(c[0]*100)/width
+			yPercent=(c[1]*100)/height
+			centersPercent.append((xPercent,yPercent))
+
+			if xPercent<50 and yPercent<50:
+				topL+=1
+			if xPercent>50 and yPercent<50:
+				topR+=1
+			if xPercent<50 and yPercent>50:
+				BottomL+=1
+			if xPercent>50 and yPercent>50:
+				BottomR+=1
+
+
 
 		#control = [0xb0, 0x74, peopleV]
 
 		#self.midiout.send_message(control)
 		self.midiM[0]["nextvalue"]=peopleV
+
+		maxCorners=6
+		self.midiM[1]["nextvalue"]=self.scaleMidi(topL,maxCorners)
+		self.midiM[2]["nextvalue"]=self.scaleMidi(topR,maxCorners)
+		self.midiM[3]["nextvalue"]=self.scaleMidi(BottomL,maxCorners)
+		self.midiM[4]["nextvalue"]=self.scaleMidi(BottomR,maxCorners)
 
 	def handleFluidMidi(self):
 
@@ -103,8 +145,10 @@ class midiMessenger():
 				elif m["nextvalue"]<value:
 					value-=1
 				#print("value",int(value),"nextvalue",m["nextvalue"])
-				message=[m["type"],m["extra"],int(value)]
-				self.midiout.send_message(message)
+				if m["type"]=="PROGRAM_CHANGE":
+					self.midiout.channel_message(PROGRAM_CHANGE,m["extra"],int(value),ch=m["channel"])
+				#message=[m["type"],m["extra"],int(value)]
+				#self.midiout.send_message(message)
 				self.midiM[i]["value"]=value
 
 			time.sleep(self.speed)

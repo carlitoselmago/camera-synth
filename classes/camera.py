@@ -31,8 +31,8 @@ class Camera():
 		self.SS=socketServer()
 		self.SS.startSession()
 
-		width=340#160*2#640#320
-		height=180#160#480#240
+		width=440#160*2#640#320
+		height=280#160#480#240
 
 		# initialize the camera and grab a reference to the raw camera capture
 		camera = PiCamera()

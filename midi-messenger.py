@@ -153,7 +153,12 @@ class midiMessenger():
 
 		for i in range(1,300):
 			target=ipbase+str(i)
-			server_check=self.is_server_up(target, self.port)
+			
+			try:
+				server_check=self.is_server_up(target, self.port)
+			except:
+				print("failed on",target)
+				server_check=False
 			if server_check:
 				serverIP=server_check[0]
 				print("FOUND ip",serverIP)
@@ -166,6 +171,9 @@ class midiMessenger():
 
 				self.midiMessenger(serverIP,self.port)
 				break
+
+		print("")
+		print("no connection found")
 
 
 

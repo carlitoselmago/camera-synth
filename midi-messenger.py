@@ -62,8 +62,9 @@ class midiMessenger():
 	def is_server_up(self,ip, port):
 	    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 	    s.settimeout(0.001)
+	    s.sendto(b'findip', (ip, port))
 	    try:
-	        s.sendto(b'findip', (ip, port))
+	        
 	        data, addr = s.recvfrom(1024)
 	        #print(data,addr)
 	        if data == b'SERVER_HERE':

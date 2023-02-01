@@ -12,7 +12,7 @@ class midiMessenger():
 	port=5000
 	SIZE=1024
 
-	serverIP=""
+	serverIP="192.168.1.170"#"192.168.1.28"
 
 
 	### midi translator vars
@@ -37,7 +37,7 @@ class midiMessenger():
 
 	def __init__(self):
 		self.midiout = rtmidi.MidiOut()
-		self.midiout = MidiOuWrapper(self.midiout)
+
 		available_ports = self.midiout.get_ports()
 
 		# here we're printing the ports to check that we see the one that loopMidi created. 
@@ -53,6 +53,7 @@ class midiMessenger():
 			self.midiout.open_virtual_port("My virtual output")
 
 		logger = logging.getLogger('pymidi.examples.server')
+
 
 
 	def get_local_ip(self):
@@ -134,7 +135,7 @@ class midiMessenger():
 		self.midiM[4]["nextvalue"]=self.scaleMidi(BottomR,maxCorners)
 
 	def handleFluidMidi(self):
-
+		midiout = MidiOutWrapper(self.midiout)
 		while True:
 
 			for i,m in enumerate(self.midiM):
@@ -146,7 +147,8 @@ class midiMessenger():
 					value-=1
 				#print("value",int(value),"nextvalue",m["nextvalue"])
 				if m["type"]=="PROGRAM_CHANGE":
-					self.midiout.channel_message(PROGRAM_CHANGE,m["extra"],int(value),ch=m["channel"])
+					PROGRAM_CHANGE=0xb0
+					midiout.channel_message(PROGRAM_CHANGE,m["extra"],int(value),ch=m["channel"])
 				#message=[m["type"],m["extra"],int(value)]
 				#self.midiout.send_message(message)
 				self.midiM[i]["value"]=value
@@ -182,12 +184,12 @@ class midiMessenger():
 		print("connection end?")
 
 	def get_server_ip(self,local_ip="0.0.0.0"):
-		server_check=self.is_server_up("192.168.1.28", self.port)
+		server_check=self.is_server_up(self.serverIP, self.port)
 		print(server_check)
 		t = Thread(target=self.handleFluidMidi)
 		t.start()
 
-		self.midiMessenger("192.168.1.28",self.port)
+		self.midiMessenger(self.serverIP,self.port)
 		"""
 		print("get server ip")
 		#octets = local_ip.split('.')[0]

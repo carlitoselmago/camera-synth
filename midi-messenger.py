@@ -99,7 +99,7 @@ class midiMessenger():
 					value+=1
 				elif m["nextvalue"]<value:
 					value-=1
-				print("value",int(value),"nextvalue",m["nextvalue"])
+				#print("value",int(value),"nextvalue",m["nextvalue"])
 				message=[m["type"],m["extra"],int(value)]
 				self.midiout.send_message(message)
 				self.midiM[i]["value"]=value
@@ -129,19 +129,7 @@ class midiMessenger():
 				"""
 				#print(f"Received {data!r}")
 				s.sendto(b'ok', (ip, port))
-		"""
-		s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-		hostName = socket.gethostbyname( '0.0.0.0' )
-		s.sendto(b'findip', (ip, port))
-		#s.bind( (hostName,port) )
-		s.settimeout(2)
-		#s.connect((ip,port))
-		#s.sendto(b'start', (ip, port))
-		while True:
-
-			data, addr = s.recvfrom(1024)
-			print(data)
-		"""
+		print("connection end?")
 
 	def get_server_ip(self,local_ip="0.0.0.0"):
 		print("get server ip")

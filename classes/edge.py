@@ -54,7 +54,7 @@ class peopleDetector():
         #pr is Push right, to tranlate right bboxes
         b=[]
         for bb in data["result"]["bounding_boxes"]:
-            if  bb['value']>0.91:
+            if  bb['value']>0.75:
                 b.append([bb['x']+pr, bb['y'], (bb['x']+pr)+bb['width'], bb['y']+bb['height']])
         return b
 

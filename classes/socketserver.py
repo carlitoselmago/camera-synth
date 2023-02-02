@@ -16,8 +16,9 @@ class socketServer():
 		hostName = gethostbyname( '0.0.0.0' )
 		print(hostName)
 		self.mySocket = socket( AF_INET, SOCK_DGRAM )
+		#
 		self.mySocket.bind( (hostName, self.PORT_NUMBER) )
-
+		self.mySocket.settimeout(5000000)
 		print ("socket server listening on port {0}\n".format(self.PORT_NUMBER))
 
 	def startSession(self):
@@ -34,7 +35,7 @@ class socketServer():
 				data=data.decode()
 				if data=="findip":
 					#if client=="":
-					print("CLIENT FOUND!")
+					print("CLIENT FOUND!",addr)
 					self.mySocket.sendto(b'SERVER_HERE',addr)
 					#self.mySocket.accept()
 					self.client=addr[0]
@@ -49,6 +50,7 @@ class socketServer():
 					#self.mySocket.sendall(b'vamooooo!')
 					#time.sleep(1)
 				"""
+				time.sleep(0.0001)
 	def sendMessage(self,name="",value=0):
 		if "conn" in dir(self):
 			try:
@@ -68,7 +70,26 @@ class socketServer():
 			with self.conn:
 				print(f"Connected by {addr}")
 				while True:
-					data = self.conn.recv(1024)
+					try:
+						data = self.conn.recv(1024)
+					except:
+						print("could not communicate with client, restart session")
+						s.close()
+						self.startSession()
+						break
+
+					finally:
+						try:
+							client=self.conn.getpeername()
+
+						except:
+							print("connection dead")
+							print("could not communicate with client, restart session")
+							s.close()
+							self.startSession()
+							break
+
 					if not data:
+						print("no data")
 						pass
 						break

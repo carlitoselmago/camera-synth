@@ -31,16 +31,16 @@ class Camera():
 		self.SS=socketServer()
 		self.SS.startSession()
 
-		width=440#160*2#640#320
-		height=280#160#480#240
+		self.width=440#160*2#640#320
+		self.height=280#160#480#240
 
 		# initialize the camera and grab a reference to the raw camera capture
 		camera = PiCamera()
-		camera.resolution = (width, height)
+		camera.resolution = (self.width, self.height)
 		camera.framerate = 15
 		camera.rotation = 0#180
 
-		rawCapture = PiRGBArray(camera, size=(width, height))
+		rawCapture = PiRGBArray(camera, size=(self.width, self.height))
 
 
 		# allow the camera to warmup
@@ -102,7 +102,9 @@ class Camera():
 						cv2.rectangle(image, (xA, yA), (xB, yB),(0, 255, 0), 2)
 
 				#send data
-				self.SS.sendMessage(json.dumps(centers))
+				data={"centers":centers,"width":self.width,"height":self.height}
+				print(data)
+				self.SS.sendMessage(json.dumps(data))
 
 			if self.wmode:
 				cv2.imshow("Frame", image);

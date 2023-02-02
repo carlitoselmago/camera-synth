@@ -36,14 +36,7 @@ class peopleDetector():
 
         res_l = self.runner.classify(features_l)
         res_r = self.runner.classify(features_r)
-
-
-
-
         boxes=self.prepareBoxes(res_l)+self.prepareBoxes(res_r,160)
-
-
-
 
         #self.print_classification(res_l, 'LEFT')
         #self.print_classification(res_r, 'RIGHT')

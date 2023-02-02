@@ -19,7 +19,7 @@ class Camera():
 
 	detector="movement"#"edge"#"hog"#"movement"
 
-	cameramode=True
+	cameramode=False
 
 	def __init__(self,arg):
 		try:

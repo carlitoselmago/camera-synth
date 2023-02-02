@@ -71,9 +71,9 @@ class midiMessenger():
 			s.close()
 		return IP
 
-	def is_server_up(self,ip, port):
+	def is_server_up(self,ip, port,timeout=15):
 		s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-		s.settimeout(15)
+		s.settimeout(timeout)
 		s.sendto(b'findip', (ip, port))
 		
 		try:
@@ -211,9 +211,27 @@ class midiMessenger():
 
 
 	def start_connection(self,local_ip="0.0.0.0"):
-		server_check=self.is_server_up(self.serverIP, self.port)
-		print("server check:",server_check)
+
+		server_check=self.is_server_up(self.serverIP, self.port,0.8)
 		
+		""" TODO: fix this for the future, it should be fast over poor wifi
+		print("get server ip")
+		#octets = local_ip.split('.')[0]
+		ipp=local_ip.split(".")
+		ipbase=ipp[0]+"."+ipp[1]+"."+ipp[2]+"."
+
+		for i in range(1,300):
+			target=ipbase+str(i)
+
+			server_check=self.is_server_up(target, self.port,0.8)
+			print("server check:",server_check)
+			if server_check:
+				self.serverIP=server_check[0]
+				print("IP FOUND!")
+				break
+			else:
+				print(target,"not the right ip")
+		"""
 		if server_check:
 			t = Thread(target=self.handleFluidMidi)
 			t.start()

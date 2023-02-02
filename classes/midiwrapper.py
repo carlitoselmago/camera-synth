@@ -1,3 +1,5 @@
+from rtmidi.midiconstants import NOTE_ON,NOTE_OFF,PROGRAM_CHANGE
+
 class MidiOutWrapper:
 	def __init__(self, midi, ch=1):
 		self.channel = ch
@@ -15,6 +17,7 @@ class MidiOutWrapper:
 
 	def note_on(self, note, velocity=127, ch=None):
 		"""Send a 'Note On' message."""
+		
 		self.channel_message(NOTE_ON, note, velocity, ch=ch)
 
 	def program_change(self, program, ch=None):

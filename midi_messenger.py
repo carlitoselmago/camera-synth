@@ -12,7 +12,7 @@ class midiMessenger():
 	port=5000
 	SIZE=1024
 
-	serverIP="192.168.1.28"
+	serverIP="192.168.1.28"#"192.168.1.133"
 
 
 	### midi translator vars
@@ -73,7 +73,7 @@ class midiMessenger():
 
 	def is_server_up(self,ip, port):
 		s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-		#s.settimeout(0.05)
+		s.settimeout(15)
 		s.sendto(b'findip', (ip, port))
 		
 		try:
@@ -178,12 +178,18 @@ class midiMessenger():
 		print("connection stablished with ",ip)
 		with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s: 
 			s.connect((ip, port))
-			#s.timeout(0.1)
+			s.settimeout(5)
 			s.sendto(b'start', (ip, port))
 			print("DATA WILL BE RECIEVED")
 			while True:
-				data = s.recv(1024)
-				data=data.decode()
+				try:
+					data = s.recv(1024)
+					#print(data)
+					data=data.decode()
+				except:
+					print("LOST CONNECTION WITH SERVER, server down?")
+					break
+					continue
 				try:
 					datalist=json.loads(data)
 					#print("datalist")
@@ -192,23 +198,26 @@ class midiMessenger():
 						self.translateData2Midi(datalist)
 				except:
 					print("Problem understanding data")
-					print(data)
+					#print(data)
 					print("")
 				try:
 					s.sendto(b'ok', (ip, port))
 				except:
+					print("refused reconect")
 					#refused reconect
 					pass
 
 		print("connection end?")
 
-	def get_server_ip(self,local_ip="0.0.0.0"):
-		server_check=self.is_server_up(self.serverIP, self.port)
-		print(server_check)
-		t = Thread(target=self.handleFluidMidi)
-		t.start()
 
-		self.midiMessenger(self.serverIP,self.port)
+	def start_connection(self,local_ip="0.0.0.0"):
+		server_check=self.is_server_up(self.serverIP, self.port)
+		print("server check:",server_check)
+		
+		if server_check:
+			t = Thread(target=self.handleFluidMidi)
+			t.start()
+			self.midiMessenger(self.serverIP,self.port)
 		"""
 		print("get server ip")
 		#octets = local_ip.split('.')[0]
@@ -250,11 +259,26 @@ class midiMessenger():
 		"""
 
 
+
 if __name__ == '__main__':
+
 	MM=midiMessenger()
-	local_ip = MM.get_local_ip()
-	#MM.midiMessenger("192.168.1.28",MM.port)
-	server_ip=MM.get_server_ip(local_ip)
 	print("")
+	pause=3
+	
+	local_ip = MM.get_local_ip()
 	print("Local IP: ",local_ip)
+
+	while True:
+		try:
+			local_ip = MM.get_local_ip()
+			MM.start_connection(local_ip)
+			print("Server is not ready waiting",pause,"seconds and retry")
+			time.sleep(pause)
+		except:
+			
+			print("something went wrong, wait",pause,"seconds and retry")
+			time.sleep(pause)
+
+	
 

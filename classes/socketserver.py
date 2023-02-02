@@ -18,39 +18,46 @@ class socketServer():
 		self.mySocket = socket( AF_INET, SOCK_DGRAM )
 		#
 		self.mySocket.bind( (hostName, self.PORT_NUMBER) )
-		self.mySocket.settimeout(5000000)
+		self.mySocket.settimeout(15)
 		print ("socket server listening on port {0}\n".format(self.PORT_NUMBER))
 
 	def startSession(self):
-		self.listenForClient()
-		#self.SS.startStream()
-		x = threading.Thread(target=self.startStream)
+		x = threading.Thread(target=self.runSession)
 		x.start()
+			
+	def runSession(self):
+		pause=3
+		while True:
+			try:
+				self.listenForClient()
+				#self.SS.startStream()
+				self.startStream()
+				
+				print("something went wrong, waiting",pause,"seconds")
+				time.sleep(pause)
+			except:
+				print("something went wrong, waiting",pause,"seconds")
+				time.sleep(pause)
 
 	def listenForClient(self):
 
-
-		while True:
-				(data,addr) = self.mySocket.recvfrom(self.SIZE)
-				data=data.decode()
-				if data=="findip":
-					#if client=="":
-					print("CLIENT FOUND!",addr)
-					self.mySocket.sendto(b'SERVER_HERE',addr)
-					#self.mySocket.accept()
-					self.client=addr[0]
-					self.client_port=addr[1]
-					break
-				print (data,addr)
-				#if data=="start":
-				"""
-				if len(self.client)>0:
-					print("vamooo",self.client)
-					self.mySocket.sendto(b'vamooooo!',(self.client,self.client_port))
-					#self.mySocket.sendall(b'vamooooo!')
-					#time.sleep(1)
-				"""
-				time.sleep(0.0001)
+	
+		try:
+			(data,addr) = self.mySocket.recvfrom(self.SIZE)
+			data=data.decode()
+			if data=="findip":
+				#if client=="":
+				print("CLIENT FOUND!",addr)
+				self.mySocket.sendto(b'SERVER_HERE',addr)
+				#self.mySocket.accept()
+				self.client=addr[0]
+				self.client_port=addr[1]
+			
+			print (data,addr)
+			#time.sleep(0.0001)
+		except:
+			print("client never appeared")
+			
 	def sendMessage(self,name="",value=0):
 		if "conn" in dir(self):
 			try:
@@ -58,13 +65,15 @@ class socketServer():
 			except:
 				del self.conn
 				print("could not communicate with client, restart session")
-				self.startSession()
+				#self.startSession()
 
 	def startStream(self):
 		print("startStream")
 		with socket(AF_INET, SOCK_STREAM) as s:
+		
 			s.setsockopt(SOL_SOCKET, SO_REUSEADDR, 1)
 			s.bind(( '0.0.0.0', self.PORT_NUMBER))
+			s.settimeout(2)
 			s.listen()
 			self.conn, addr = s.accept()
 			with self.conn:
@@ -75,7 +84,7 @@ class socketServer():
 					except:
 						print("could not communicate with client, restart session")
 						s.close()
-						self.startSession()
+						#self.runSession()
 						break
 
 					finally:
@@ -86,7 +95,7 @@ class socketServer():
 							print("connection dead")
 							print("could not communicate with client, restart session")
 							s.close()
-							self.startSession()
+							#self.runSession()
 							break
 
 					if not data:
